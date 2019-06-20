@@ -8,28 +8,44 @@ node {
 
   stage("Permissions"){
     // change directory
-    sh "cd AdminServer"
+    dir("AdminServer"){
     // set maven wrapper permissions
-    sh "cd AdminServer && chmod 711 ./mvnw"
+      sh "chmod 711 ./mvnw"
+    }
+    // change directory
+    sh "cd AdminServer"
+    
   }
 
   stage("Test"){
     // run tests
-    sh "./mvnw test"
+    dir("AdminServer"){
+      sh "./mvnw test"
+    }
+    
   }
 
   stage("Build Project"){
-    // build the project 
-    sh "./mvnw clean install"
+    dir("AdminServer"){
+      // build the project 
+      sh "./mvnw clean install"
+    }
+    
   }
 
   stage("Build Image"){
-    app = docker.build("zechheneveld/admin-server")
+    dir("AdminServer"){
+      app = docker.build("zechheneveld/admin-server")
+    }
+    
   }
 
   stage("Push Image"){
-    // push the image to docker hub
-    sh "echo TODO"
+    dir("AdminServer"){
+      // push the image to docker hub
+      sh "echo TODO"
+    }
+    
   }
 
 }
