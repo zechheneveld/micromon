@@ -43,9 +43,10 @@ node {
   stage("Push Image"){
     dir("AdminServer"){
       // push the image to docker hub
-      sh "echo TODO"
-    }
-    
+      docker.withRegistry("https://registry.hub.docker.com", "docker-hub-credentials"){
+        app.push("${env.BUILD_NUMBER}")
+        app.push("latest")
+      }
+    } 
   }
-
 }
