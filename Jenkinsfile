@@ -5,12 +5,12 @@ node {
     // clone the repository
     checkout scm
   }
-  
+
   stage("Permissions"){
     // change directory
     sh "cd AdminServer"
     // set maven wrapper permissions
-    sh "chmod 711 ./mvnw"
+    sh "cd AdminServer && chmod 711 ./mvnw"
   }
 
   stage("Test"){
