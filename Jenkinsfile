@@ -1,8 +1,8 @@
 // groovy language
 void theProcess(folder,image){
   def app
-  script{
-    stage("permissions"){
+  script {
+    stage("permissions") {
       dir(folder){
         sh "chmod 711 ./mvnw"
       }
@@ -19,7 +19,7 @@ void theProcess(folder,image){
     }
     stage("deploy"){
       dir(folder){
-        docker.withRegistry("https://registry.hub.docker.com", "docker-hub-credentials"){
+        docker.withRegistry("https://registry.hub.docker.com","docker-hub-credentials") {
           app.push("${env.BUILD_NUMBER}")
           app.push("latest")
         }
@@ -27,33 +27,32 @@ void theProcess(folder,image){
     }
   }
 }
-
 pipeline {
-  agent any
+  agent any 
   stages {
-    stage("automation"){
+    stage("automation") {
       parallel {
-        stage("AdminServer"){
+        stage("AdminServer") {
           steps {
             theProcess("AdminServer","admin-server")
           }
         }
-        stage("DiscoveryServer"){
+        stage("DiscoveryServer") {
           steps {
             theProcess("DiscoveryServer","discovery-server")
           }
         }
-        stage("PokemonService"){
+        stage("PokemonService") {
           steps {
             theProcess("PokemonService","pokemon-service")
           }
         }
-        stage("TrainerService"){
+        stage("TrainerService") {
           steps {
             theProcess("TrainerService","trainer-service")
           }
         }
       }
     }
-  }
+  }  
 }
