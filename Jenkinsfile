@@ -1,49 +1,59 @@
-node {
+// groovy language
+void theProcess(folder,image){
   def app
-
-  stage("clone repository"){
-    // clone the repository
-    checkout scm
-  }
-
-  stage("Permissions"){
-    // change directory
-    dir("AdminServer"){
-    // set maven wrapper permissions
-      sh "chmod 711 ./mvnw"
-    }
-  }
-
-  stage("Test"){
-    // run tests
-    dir("AdminServer"){
-      sh "./mvnw test"
-    }
-    
-  }
-
-  stage("Build Project"){
-    dir("AdminServer"){
-      // build the project 
-      sh "./mvnw clean install"
-    }
-    
-  }
-
-  stage("Build Image"){
-    dir("AdminServer"){
-      app = docker.build("zechheneveld/admin-server")
-    }
-    
-  }
-
-  stage("Push Image"){
-    dir("AdminServer"){
-      // push the image to docker hub
-      docker.withRegistry("https://registry.hub.docker.com", "docker-hub-credentials"){
-        app.push("${env.BUILD_NUMBER}")
-        app.push("latest")
+  script{
+    stage("permissions"){
+      dir(folder){
+        sh "chmod 711 ./mvnw"
       }
-    } 
+    }
+    stage("install"){
+      dir(folder){
+        sh "./mvnw -T 1C install -DskipTests"
+      }
+    }
+    stage("build"){
+      dir(folder){
+        app = docker.build("zechheneveld/"+image)
+      }
+    }
+    stage("deploy"){
+      dir(folder){
+        docker.withRegistry("https://registry.hub.docker.com", "docker-hub-credentials"){
+          app.push("${env.BUILD_NUMBER}")
+          app.push("latest")
+        }
+      }
+    }
+  }
+}
+
+pipeline {
+  agent any
+  stages {
+    stage("automation"){
+      parallel {
+        stage("AdminServer"){
+          steps {
+            theProcess("AdminServer","admin-server")
+          }
+        }
+        stage("DiscoveryServer"){
+          steps {
+            theProcess("DiscoveryServer","discovery-server")
+          }
+        }
+        stage("PokemonService"){
+          steps {
+            theProcess("PokemonService","pokemon-service")
+          }
+        }
+        stage("TrainerService"){
+          steps {
+            theProcess("TrainerService","trainer-service")
+          }
+        }
+      }
+    }
   }
 }
